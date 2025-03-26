@@ -1,0 +1,14 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{% block title %}Online Judge{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'problems/css/style.css' %}">
+</head>
+
+<body>
+    {% block content %}{% endblock %}
+</body>
+
+</html>

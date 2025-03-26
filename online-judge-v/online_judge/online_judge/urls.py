@@ -17,9 +17,11 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-import problems
+from problems.views import all_problems
 
 urlpatterns = [
+    path('', all_problems,  name='root'),
     path("admin/", admin.site.urls),
     path("problems/", include('problems.urls')),
+    path('user/', include('user.urls')),
 ]
