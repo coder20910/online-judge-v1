@@ -5,6 +5,7 @@ from pathlib import Path
 from django.conf import settings
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from problems.models import Problems, TestCase
 from .models import CodeSubmission
 
 def ensure_directories_exist():
@@ -29,6 +30,7 @@ def execute_code(language, file_paths):
     """Handles execution of Python and C++ code safely."""
     try:
         if language == "cpp":
+            print("running c++")
             executable_path = file_paths["code"].with_suffix("")
             compile_result = subprocess.run(
                 ["clang++", str(file_paths["code"]), "-o", str(executable_path)],
@@ -36,7 +38,7 @@ def execute_code(language, file_paths):
             )
 
             if compile_result.returncode != 0:
-                return compile_result.stderr
+                return {'status': 'error', 'error_message': compile_result.stderr, 'output':''}
 
             with open(file_paths["input"], "r", encoding="utf-8") as input_file, \
                  open(file_paths["output"], "w", encoding="utf-8") as output_file:
@@ -56,16 +58,17 @@ def execute_code(language, file_paths):
                     stdin=input_file,
                     stdout=output_file,
                     stderr=subprocess.PIPE,
-                    text=True
+                    text=True,
+                    timeout=5
                 )
                 if result.stderr:
                     output_file.write("\nError:\n" + result.stderr)
 
-    except Exception as e:
-        return f"Execution error: {str(e)}"
+    except subprocess.TimeoutExpired:
+        return {'status': 'error', 'error_message': 'Time Limit Exceeded', 'output': ''}
 
     with open(file_paths["output"], "r", encoding="utf-8") as output_file:
-        return output_file.read()
+        return {'status': 'success', 'output': output_file.read(), 'error_message': ''}
 
 def run_code_func(code, language, input_data, query_type="run", user=None):
     ensure_directories_exist()
@@ -82,23 +85,65 @@ def run_code_func(code, language, input_data, query_type="run", user=None):
     with open(file_paths["input"], "w", encoding="utf-8") as input_file:
         input_file.write(input_data)
 
-    output_data = execute_code(language, file_paths)
+    output_data = None
+    execute_code_result = execute_code(language, file_paths)
 
-    if query_type == "run":
+    for path in file_paths.values():
+        path.unlink(missing_ok=True)
 
-        # for path in file_paths.values():
-        #     path.unlink(missing_ok=True)
-        pass
-    elif query_type == "submit" and user:
-        CodeSubmission.objects.create(
-            user=user,
-            language=language,
-            code=file_paths["code"],
-            user_input=file_paths["input"],
-            output=file_paths["output"]
-        )
+    if execute_code_result['status'] == "success":
+        return execute_code_result['output']
+    else:
+        return execute_code_result['error_message']
 
-    return output_data
+def submit_code_func(code, language, problem_id, user = None, time_limit = 5):
+    ensure_directories_exist()
+    language_map = {"python": "py", "cpp": "cpp"}
+    language = language_map.get(language)
+    if not language:
+        return "Unsupported language."
+
+    unique_id = str(uuid.uuid4())
+    file_paths = generate_file_paths(unique_id, language)
+
+    with open(file_paths["code"], "w", encoding="utf-8") as code_file:
+        code_file.write(code)
+
+    test_cases = TestCase.objects.filter(problem_id=problem_id)
+    print("test_cases", test_cases)
+    all_passed = True
+    verdicts = []
+
+    for tc in test_cases:
+        input_data = tc.input_data
+
+        with open(file_paths["input"], "w", encoding="utf-8") as input_file:
+            input_file.write(input_data)
+
+        code_evaluation_result = execute_code(language, file_paths)
+
+        if code_evaluation_result['status'] != 'success':
+            verdicts.append({'input': tc.input_data, 'verdict': code_evaluation_result['status'], 'code_output': code_evaluation_result['output']})
+            all_passed = False
+            continue
+
+        if code_evaluation_result['output'].strip() != tc.output_data.strip():
+            verdicts.append({'input': tc.input_data, 'verdict': 'Wrong Answer', 'expected_output': tc.output_data.strip(), 'code_output': code_evaluation_result['output'].strip()})
+            all_passed = False
+        else:
+            verdicts.append({'input': tc.input_data, 'verdict': 'Passed'})
+
+    print("verdicts", verdicts)
+
+    CodeSubmission.objects.create(
+        user=user,
+        language=language,
+        code=file_paths["code"],
+        user_input=file_paths["input"],
+        output=file_paths["output"]
+    )
+    final_verdict = "Accepted" if all_passed else "Failed"
+    return final_verdict
 
 @login_required
 def run_code_view(request):
@@ -114,14 +159,13 @@ def run_code_view(request):
     return JsonResponse({"message": "Invalid request method."}, status=400)
 
 @login_required
-def submit_code_view(request):
+def submit_code_view(request, problem_id):
     if request.method == "POST":
         request_body = json.loads(request.body)
         code = request_body.get("code")
         language = request_body.get("language")
-        input_data = request_body.get("input", "")
 
-        output = run_code_func(code=code, language=language, input_data=input_data, query_type="submit", user=request.user)
-        return JsonResponse({"output": output})
+        output = submit_code_func(code=code, language=language, problem_id=problem_id, user=request.user)
+        return JsonResponse({"message": output})
 
     return JsonResponse({"message": "Invalid request method."}, status=400)

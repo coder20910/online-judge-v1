@@ -247,6 +247,7 @@
                     <option value="python">Python</option>
                     <option value="javascript">JavaScript</option>
                     <option value="java">Java</option>
+                    <option value="cpp">C++</option> <!-- Added C++ -->
                 </select>
                 <div>
                     <button class="btn btn-code-run me-2" onclick="runCode()">Run</button>
@@ -285,7 +286,9 @@
         document.getElementById("language-select").addEventListener("change", function () {
             var language = this.value;
             var mode = language === "python" ? "python" :
-                language === "javascript" ? "javascript" : "text/x-java";
+                       language === "javascript" ? "javascript" :
+                       language === "java" ? "text/x-java" :
+                       language === "cpp" ? "text/x-c++src" : "plaintext"; // Added C++ mode
             editor.setOption("mode", mode);
         });
 
@@ -321,13 +324,13 @@
             var language = document.getElementById("language-select").value;
             var problemId = "{{ problem.id }}";
 
-            fetch("/code/submit_code/", {
+            fetch(`/code/submit_code/${problemId}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": "{{ csrf_token }}"
                 },
-                body: JSON.stringify({ code, language, problem_id: problemId })
+                body: JSON.stringify({ code, language})
             })
                 .then(response => response.json())
                 .then(data => {
