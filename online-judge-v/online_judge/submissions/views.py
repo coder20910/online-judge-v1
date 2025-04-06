@@ -85,8 +85,10 @@ def run_code_func(code, language, input_data, query_type="run", user=None):
     output_data = execute_code(language, file_paths)
 
     if query_type == "run":
-        for path in file_paths.values():
-            path.unlink(missing_ok=True)
+
+        # for path in file_paths.values():
+        #     path.unlink(missing_ok=True)
+        pass
     elif query_type == "submit" and user:
         CodeSubmission.objects.create(
             user=user,

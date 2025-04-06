@@ -9,3 +9,10 @@ class Problems(models.Model):
 
     def __str__(self):
         return str(self.title)
+
+class TestCase(models.Model):
+    problem = models.ForeignKey(Problems, on_delete=models.CASCADE, related_name="testcases")
+    input_data = models.TextField()
+    output_data = models.TextField()
+    is_public = models.BooleanField(default=False)
+    is_sample = models.BooleanField(default=False)

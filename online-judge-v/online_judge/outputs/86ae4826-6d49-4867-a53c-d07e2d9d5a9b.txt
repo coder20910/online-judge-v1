@@ -1,0 +1,6 @@
+
+Error:
+Traceback (most recent call last):
+  File "C:\AVRL\online-judge-v\online_judge\codes\86ae4826-6d49-4867-a53c-d07e2d9d5a9b_code.py", line 1, in <module>
+    a = int(input())
+EOFError: EOF when reading a line
