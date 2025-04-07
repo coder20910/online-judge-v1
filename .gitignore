@@ -97,11 +97,9 @@ celerybeat-schedule.*
 # SageMath parsed files 
 *.sage.py 
 
-# Environments
-.myenv
+# Environments 
 .env 
 .venv 
-myenv/
 env/ 
 venv/ 
 ENV/ 
@@ -138,3 +136,7 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+online_judge/inputs/
+online_judge/codes/
+online_judge/outputs/

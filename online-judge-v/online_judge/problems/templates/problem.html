@@ -185,7 +185,8 @@
 
         .problem-description,
         .example-section {
-            padding: 1rem; /* Ensure equal padding for both sections */
+            padding: 1rem;
+            /* Ensure equal padding for both sections */
             font-size: 15px;
             line-height: 1.6;
             color: var(--text-primary);
@@ -270,25 +271,41 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.js"></script>
+
+    <!-- Commenting support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/comment/comment.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/comment/continuecomment.min.js"></script>
+
+    <!-- Sublime keymap for Ctrl+/ etc -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/keymap/sublime.min.js"></script>
+
+    <!-- Needed for toggleComment -->
+
     <script>
         var editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
-            mode: "python",
+            mode: "python", // This will change dynamically anyway
             theme: "default",
-            lineNumbers: true
+            lineNumbers: true,
+            keyMap: "sublime", // <-- THIS is critical
+            extraKeys: {
+                "Ctrl-/": "toggleComment",             // Line comment Windows/Linux
+                "Cmd-/": "toggleComment",              // Line comment Mac
+                "Shift-Alt-A": "toggleBlockComment",   // Block comment Windows/Linux
+                "Shift-Option-A": "toggleBlockComment" // Block comment Mac
+            }
         });
 
         document.getElementById("language-select").addEventListener("change", function () {
             var language = this.value;
             var mode = language === "python" ? "python" :
-                       language === "javascript" ? "javascript" :
-                       language === "java" ? "text/x-java" :
-                       language === "cpp" ? "text/x-c++src" : "plaintext"; // Added C++ mode
+                language === "javascript" ? "javascript" :
+                    language === "java" ? "text/x-java" :
+                        language === "cpp" ? "text/x-c++src" : "plaintext"; // Added C++ mode
             editor.setOption("mode", mode);
         });
 
@@ -330,7 +347,7 @@
                     "Content-Type": "application/json",
                     "X-CSRFToken": "{{ csrf_token }}"
                 },
-                body: JSON.stringify({ code, language})
+                body: JSON.stringify({ code, language })
             })
                 .then(response => response.json())
                 .then(data => {
