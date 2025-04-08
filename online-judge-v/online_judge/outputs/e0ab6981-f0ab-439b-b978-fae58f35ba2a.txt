@@ -1,6 +1,0 @@
-
-Error:
-Traceback (most recent call last):
-  File "C:\AVRL\online-judge-v\online_judge\codes\e0ab6981-f0ab-439b-b978-fae58f35ba2a_code.py", line 13, in <module>
-    num = int(input())
-EOFError: EOF when reading a line

@@ -1,6 +1,0 @@
-
-Error:
-Traceback (most recent call last):
-  File "C:\AVRL\online-judge-v\online_judge\codes\b12a7df5-e2a1-49be-8613-360e6bb5024b_code.py", line 11, in <module>
-    tc_count = int(input())
-EOFError: EOF when reading a line

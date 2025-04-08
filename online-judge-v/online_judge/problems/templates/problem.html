@@ -108,7 +108,8 @@
         }
 
         .input-section,
-        .output-section {
+        .output-section,
+        .verdict-section {
             flex: 1;
             padding: 1rem;
             border-right: 1px solid var(--border-color);
@@ -163,11 +164,16 @@
             border: 1px solid var(--border-color);
             border-radius: 4px;
             padding: 0.5rem;
+            padding-left: 20px;
+            padding-right: 50px;
+            width: 150px;
+            /* Set a fixed width */
+
         }
 
         .form-select:focus {
             background-color: var(--bg-secondary);
-            color: var(--text-primary);
+            color: var (--text-primary);
             border-color: var(--text-primary);
             box-shadow: none;
             /* Remove default focus outline */
@@ -199,7 +205,7 @@
 
         .example-section pre {
             background-color: var(--bg-secondary);
-            color: var(--text-primary);
+            color: var (--text-primary);
             border: 1px solid var(--border-color);
             padding: 0.5rem;
             border-radius: 4px;
@@ -208,17 +214,144 @@
         .example-section p {
             color: var(--text-primary);
         }
+
+        .resizer {
+            width: 5px;
+            background: #ccc;
+            cursor: col-resize;
+            position: relative;
+            z-index: 1;
+        }
+
+        #collapseBtn {
+            padding: 0 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        /* Breadcrumb Navigation */
+        .problem-navigation {
+            background-color: var(--bg-secondary);
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .breadcrumb {
+            list-style: none;
+            display: flex;
+            gap: 0.5rem;
+            margin: 0;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb li {
+            display: inline;
+        }
+
+        .breadcrumb li a {
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .breadcrumb li a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb li.active {
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 4px;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-dark {
+            background-color: #343a40;
+            color: white;
+            border: none;
+        }
+
+        .btn-dark:hover {
+            background-color: #23272b;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 0 -0.5rem;
+        }
+
+        .col-sm-4 {
+            flex: 0 0 33.3333%;
+            max-width: 33.3333%;
+            padding: 0 0.5rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .pr-1 {
+            padding-right: 0.25rem;
+        }
+
+        .pl-1 {
+            padding-left: 0.25rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Navigation Bar -->
     <nav class="navbar">
         <span class="navbar-brand">Online Judge</span>
         <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
     </nav>
 
+    <!-- Problem Navigation -->
+
+
     <div class="main-container">
-        <div class="problem-panel">
+        <div class="problem-panel" id="problem-panel">
+            <div style="text-align: right; padding: 5px 10px;">
+                <!-- <button id="collapse-btn" class="btn btn-sm btn-outline-secondary">⮘</button> -->
+            </div>
             <div class="problem-header">
                 <h4>{{ problem.title }}</h4>
                 <span class="badge bg-secondary">{{ problem.difficulty }}</span>
@@ -241,20 +374,22 @@
             </div>
             {% endif %}
         </div>
-
+        <div class="resizer" id="drag-handle"></div>
         <div class="editor-panel">
             <div class="editor-header">
                 <select id="language-select" class="form-select w-auto">
                     <option value="python">Python</option>
                     <option value="javascript">JavaScript</option>
                     <option value="java">Java</option>
-                    <option value="cpp">C++</option> <!-- Added C++ -->
+                    <option value="cpp">C++</option>
                 </select>
-                <div>
+                <!-- <div>
                     <button class="btn btn-code-run me-2" onclick="runCode()">Run</button>
                     <button class="btn btn-code-submit" onclick="submitCode()">Submit</button>
-                </div>
+                </div> -->
             </div>
+
+
 
             <textarea id="code-editor"></textarea>
 
@@ -266,6 +401,27 @@
                 <div class="output-section">
                     <h6>Output</h6>
                     <pre id="output" class="input-textarea"></pre>
+                </div>
+                <div class="verdict-section">
+                    <h6>Verdict</h6>
+                    <pre id="verdict" class="input-textarea"></pre>
+                </div>
+            </div>
+            <div class="row mb-3 mt-3">
+                <div class="col-sm-4 text-center pr-1">
+                    <button id="toggle-console" class="btn btn-block btn-secondary">
+                        Console <i class="fa-solid fa-terminal ml-2"></i>
+                    </button>
+                </div>
+                <div class="col-sm-4 text-center pl-1 pr-1">
+                    <button onclick="runCode()" class="btn btn-block btn-dark">
+                        Run <i class="fa-solid fa-play ml-2"></i>
+                    </button>
+                </div>
+                <div class="col-sm-4 text-center pl-1">
+                    <button onclick="submitCode()" id="submit" class="btn btn-block btn-danger">
+                        Submit <i class="fa-solid fa-circle-check ml-2"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -287,6 +443,12 @@
     <!-- Needed for toggleComment -->
 
     <script>
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", newTheme);
+            editor.setOption("theme", newTheme === "dark" ? "dracula" : "default");
+        }
         var editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
             mode: "python", // This will change dynamically anyway
             theme: "default",
@@ -308,13 +470,75 @@
                         language === "cpp" ? "text/x-c++src" : "plaintext"; // Added C++ mode
             editor.setOption("mode", mode);
         });
+        const resizer = document.getElementById('drag-handle');
+        const leftPanel = document.getElementById('problem-panel');
+        const rightPanel = document.querySelector('.editor-panel');
+        // const collapseBtn = document.getElementById('collapse-btn');
+        const container = document.querySelector('.main-container');
 
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute("data-theme");
-            const newTheme = currentTheme === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", newTheme);
-            editor.setOption("theme", newTheme === "dark" ? "dracula" : "default");
+        let isDragging = false;
+
+        // Load saved width from localStorage
+        window.addEventListener('load', () => {
+            const savedWidth = localStorage.getItem('problemPanelWidth');
+            if (savedWidth) {
+                leftPanel.style.width = savedWidth;
+                rightPanel.style.width = `calc(100% - ${savedWidth} - 5px)`;
+            }
+        });
+
+        // Start dragging
+        resizer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        // Dragging logic
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const containerLeft = container.offsetLeft;
+            const pointerX = e.clientX - containerLeft;
+            const containerWidth = container.offsetWidth;
+
+            const minLeft = 200;
+            const minRight = 300;
+
+            if (pointerX > minLeft && containerWidth - pointerX > minRight) {
+                const leftWidthPx = `${pointerX}px`;
+                leftPanel.style.width = leftWidthPx;
+                rightPanel.style.width = `calc(100% - ${leftWidthPx} - 5px)`;
+                localStorage.setItem('problemPanelWidth', leftWidthPx);
+            }
+        });
+
+        // Stop dragging
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            document.body.style.cursor = 'default';
+            document.body.style.userSelect = 'auto';
+        });
+
+        // Function to resize the language-select dropdown
+        function resizeLanguageSelect() {
+            const select = document.getElementById("language-select");
+            const tempOption = document.createElement("option");
+            tempOption.textContent = select.options[select.selectedIndex].text;
+            document.body.appendChild(tempOption);
+
+            // Set the width of the select element based on the option's width
+            select.style.width = `${tempOption.offsetWidth + 20}px`;
+
+            // Remove the temporary option element
+            document.body.removeChild(tempOption);
         }
+
+        // Add event listener to resize the dropdown when the selected option changes
+        document.getElementById("language-select").addEventListener("change", resizeLanguageSelect);
+
+        // Call the function initially to set the correct width
+        resizeLanguageSelect();
 
         function runCode() {
             var code = editor.getValue();
@@ -351,10 +575,35 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    alert(data.message);
+                    const verdictElement = document.getElementById("verdict");
+                    verdictElement.textContent = data.message;
+
+                    // Set the color based on the verdict
+                    if (data.message === "Accepted") {
+                        verdictElement.style.color = "green"; // Green for Accepted
+                    } else {
+                        verdictElement.style.color = "red"; // Red for errors or other messages
+                    }
                 })
-                .catch(error => console.error("Error:", error));
+                .catch(error => {
+                    console.error("Error:", error);
+
+                    // Handle errors
+                    const verdictElement = document.getElementById("verdict");
+                    verdictElement.textContent = "An error occurred while submitting the code.";
+                    verdictElement.style.color = "red"; // Red for submission errors
+                });
         }
+
+        // Toggle the visibility of the io-container
+        document.getElementById("toggle-console").addEventListener("click", function () {
+            const ioContainer = document.querySelector(".io-container");
+            if (ioContainer.style.display === "none" || ioContainer.style.display === "") {
+                ioContainer.style.display = "flex"; // Make it visible
+            } else {
+                ioContainer.style.display = "none"; // Hide it
+            }
+        });
     </script>
 </body>
 

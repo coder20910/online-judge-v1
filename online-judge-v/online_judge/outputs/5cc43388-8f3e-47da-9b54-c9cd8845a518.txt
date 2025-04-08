@@ -1,6 +1,0 @@
-
-Error:
-Traceback (most recent call last):
-  File "C:\AVRL\online-judge-v\online_judge\codes\5cc43388-8f3e-47da-9b54-c9cd8845a518_code.py", line 1, in <module>
-    a = int(input())
-ValueError: invalid literal for int() with base 10: '1 12'
