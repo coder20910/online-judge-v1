@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8" />
@@ -102,23 +102,63 @@
         }
 
         .io-container {
-            display: flex;
-            height: 180px;
+            display: none;
+            flex-direction: column;
             border-top: 1px solid var(--border-color);
+        }
+
+        .io-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+        }
+
+        .io-buttons .btn {
+            flex: 1;
+            margin: 0 0.5rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        .io-content {
+            display: flex;
+            flex-direction: column;
+            height: 100px;
+            /* Set a fixed height for the container */
+            width: 100%;
+            /* Ensure full width */
         }
 
         .input-section,
         .output-section,
         .verdict-section {
             flex: 1;
-            padding: 1rem;
-            border-right: 1px solid var(--border-color);
+            display: none;
+            /* Hidden by default */
+            height: 100%;
+            /* Ensure they take up the full height of the container */
+            width: 100%;
+            /* Ensure full width */
+            overflow-y: auto;
+            /* Add scrolling if content exceeds the height */
+        }
+
+        .input-section.active,
+        .output-section.active,
+        .verdict-section.active {
+            display: block;
+            /* Show the active section */
         }
 
         .input-textarea,
-        #output {
+        .output-textarea,
+        .verdict-textarea {
             width: 100%;
-            height: calc(100% - 30px);
+            /* height: 10vh; */
+            /* Adjust height to fit within the container */
             resize: none;
             padding: 0.5rem;
             border: 1px solid var(--border-color);
@@ -393,18 +433,22 @@
 
             <textarea id="code-editor"></textarea>
 
-            <div class="io-container">
-                <div class="input-section">
-                    <h6>Input</h6>
-                    <textarea id="code-input" class="input-textarea" placeholder="Enter input..."></textarea>
+            <div class="io-container" style="display: none;">
+                <div class="io-buttons">
+                    <button id="show-input" class="btn btn-secondary">Input</button>
+                    <button id="show-output" class="btn btn-secondary">Output</button>
+                    <button id="show-verdict" class="btn btn-secondary">Verdict</button>
                 </div>
-                <div class="output-section">
-                    <h6>Output</h6>
-                    <pre id="output" class="input-textarea"></pre>
-                </div>
-                <div class="verdict-section">
-                    <h6>Verdict</h6>
-                    <pre id="verdict" class="input-textarea"></pre>
+                <div class="io-content">
+                    <div class="input-section" id="input-section">
+                        <textarea id="code-input" class="input-textarea" placeholder="Enter input..."></textarea>
+                    </div>
+                    <div class="output-section" id="output-section">
+                        <pre id="output" class="output-textarea"></pre>
+                    </div>
+                    <div class="verdict-section" id="verdict-section">
+                        <pre id="verdict" class="verdict-textarea"></pre>
+                    </div>
                 </div>
             </div>
             <div class="row mb-3 mt-3">
@@ -443,15 +487,18 @@
     <!-- Needed for toggleComment -->
 
     <script>
+        // Toggle between light and dark themes
         function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute("data-theme");
             const newTheme = currentTheme === "dark" ? "light" : "dark";
             document.documentElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme); // Save theme preference
             editor.setOption("theme", newTheme === "dark" ? "dracula" : "default");
         }
+
         var editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
             mode: "python", // This will change dynamically anyway
-            theme: "default",
+            theme: "dracula", // Default to dark mode
             lineNumbers: true,
             keyMap: "sublime", // <-- THIS is critical
             extraKeys: {
@@ -555,6 +602,10 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    // Show the output-section using toggleSection
+                    toggleSection("output-section");
+
+                    // Update the output pre element
                     document.getElementById("output").textContent = data.output;
                 })
                 .catch(error => console.error("Error:", error));
@@ -575,6 +626,10 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    // Show the verdict-section using toggleSection
+                    toggleSection("verdict-section");
+
+                    // Update the verdict pre element
                     const verdictElement = document.getElementById("verdict");
                     verdictElement.textContent = data.message;
 
@@ -589,6 +644,7 @@
                     console.error("Error:", error);
 
                     // Handle errors
+                    toggleSection("verdict-section"); // Show the verdict-section
                     const verdictElement = document.getElementById("verdict");
                     verdictElement.textContent = "An error occurred while submitting the code.";
                     verdictElement.style.color = "red"; // Red for submission errors
@@ -603,6 +659,32 @@
             } else {
                 ioContainer.style.display = "none"; // Hide it
             }
+        });
+
+        // Function to toggle visibility of sections
+        function toggleSection(showSectionId) {
+            const sections = ["input-section", "output-section", "verdict-section"];
+            sections.forEach((sectionId) => {
+                const section = document.getElementById(sectionId);
+                if (sectionId === showSectionId) {
+                    section.classList.add("active"); // Show the selected section
+                } else {
+                    section.classList.remove("active"); // Hide other sections
+                }
+            });
+        }
+
+        // Event listeners for buttons
+        document.getElementById("show-input").addEventListener("click", function () {
+            toggleSection("input-section");
+        });
+
+        document.getElementById("show-output").addEventListener("click", function () {
+            toggleSection("output-section");
+        });
+
+        document.getElementById("show-verdict").addEventListener("click", function () {
+            toggleSection("verdict-section");
         });
     </script>
 </body>
