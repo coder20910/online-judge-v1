@@ -1,17 +1,156 @@
-{% extends 'problems/base.html' %}
+{% extends 'base/base.html' %}
+{% load static %}
 
 {% block title %}Register - Online Judge{% endblock %}
 
+{% block custom_css %}
+<style>
+    .flex {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 60px);
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        text-align: left;
+    }
+
+    .form-group input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.5rem;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus {
+        border-color: var(--text-primary);
+        outline: none;
+    }
+
+    .btn {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.75rem;
+        background-color: var(--text-primary);
+        color: var(--bg-secondary);
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .text-red + .btn {
+        margin-top: 0;
+    }
+
+    .btn:hover {
+        background-color: #1e293b;
+    }
+
+    .text-red {
+        color: #e3342f;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .non-login-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .non-login-area h1 {
+        font-size: 3.5rem;
+        line-height: 3.875rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0;
+    }
+
+    .non-login-area p {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .login-prompt {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .login-prompt p {
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .login-prompt a {
+        color: var(--text-primary);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .login-prompt a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'user/css/style.css' %}">
+{% endblock %}
+
 {% block content %}
-<h2>Register</h2>
-{% if error %}
-<p style="color: red;">{{ error }}</p>
-{% endif %}
-<form method="post">
-    {% csrf_token %}
-    <p><label>Username: <input type="text" name="username" required></label></p>
-    <p><label>Password: <input type="password" name="password" required></label></p>
-    <p><label>Confirm Password: <input type="password" name="confirm_password" required></label></p>
-    <button type="submit">Register</button>
-</form>
+<div class="flex">
+    <div class="login-area">
+        <div class="non-login-area">
+            <h1>Join us!</h1>
+            <p>Create your account today.</p>
+        </div>
+        <div class="login-area-form">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password:</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                {% if error %}
+                <p class="text-red">{{ error }}</p>
+                {% endif %}
+                <button type="submit" class="btn">Register</button>
+                <div class="login-prompt">
+                    <p>Already have an account? <a href="{% url 'user:login' %}">Login here</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

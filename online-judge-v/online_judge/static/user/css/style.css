@@ -1,0 +1,124 @@
+.flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 60px);
+}
+
+.login-area {
+    background-color: var(--bg-primary);
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-area-form {
+    margin-top: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    text-align: left;
+}
+
+.form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    border-color: var(--text-primary);
+    outline: none;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem;
+    background-color: var(--text-primary);
+    color: var(--bg-secondary);
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 2rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--text-primary);
+}
+
+/* Remove the tooltip effect since it's not needed */
+.btn:hover::after {
+    display: none;
+}
+
+.text-red {
+    color: #e3342f;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.non-login-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.non-login-area h1 {
+    font-size: 3.5rem;
+    line-height: 3.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+.non-login-area p {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+.login-prompt, .register-prompt {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.login-prompt p, .register-prompt p {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.login-prompt a, .register-prompt a {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-prompt a:hover, .register-prompt a:hover {
+    text-decoration: underline;
+}

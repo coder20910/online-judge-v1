@@ -134,15 +134,16 @@ def submit_code_func(code, language, problem_id, user = None, time_limit = 5):
             verdicts.append({'input': tc.input_data, 'verdict': 'Passed'})
 
     print("verdicts", verdicts)
+    final_verdict = "Accepted" if all_passed else "Failed"
 
     CodeSubmission.objects.create(
         user=user,
         language=language,
         code=file_paths["code"],
         user_input=file_paths["input"],
-        output=file_paths["output"]
+        output=file_paths["output"],
+        # verdict=final_verdict
     )
-    final_verdict = "Accepted" if all_passed else "Failed"
     return final_verdict
 
 @login_required

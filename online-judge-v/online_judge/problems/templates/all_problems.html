@@ -1,19 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base/base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Judge</title>
-</head>
+{% block title %}All Problems - Online Judge{% endblock %}
 
-<body>
+{% block custom_css %}
+<style>
+    .problems-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
 
+    .problem-card {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .problem-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-color: #0d6efd;
+    }
+
+    .problem-info {
+        flex: 1;
+    }
+
+    .problem-link {
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .problem-difficulty {
+        font-size: 0.9rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        display: inline-block;
+        margin-left: 1rem;
+    }
+
+    .difficulty-easy {
+        background-color: #198754;
+        color: white;
+    }
+
+    .difficulty-medium {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .difficulty-hard {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .problems-header {
+        text-align: center;
+        color: var(--text-primary);
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 2rem 0;
+        padding: 0 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="problems-header">Problems List</div>
+<div class="problems-container">
     {% for problem in problems %}
-    <div>
-        <a href="/problems/{{problem.id}}">{{ problem.title }}</a>
+    <div class="problem-card">
+        <div class="problem-info">
+            <a class="problem-link" href="/problems/{{problem.id}}">{{ problem.title }}</a>
+            <!-- <span class="problem-difficulty difficulty-{{ problem.difficulty|lower }}">
+                {{ problem.difficulty }}
+            </span> -->
+        </div>
     </div>
     {% endfor %}
-</body>
-
-</html>
+</div>
+{% endblock %}
