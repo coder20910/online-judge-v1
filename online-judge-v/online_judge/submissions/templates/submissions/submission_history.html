@@ -1,0 +1,238 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Submission History - Online Judge{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+{% endblock %}
+
+{% block custom_css %}
+<style>
+    .submission-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .submissions-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: var(--bg-primary);
+    }
+
+    .submissions-table th,
+    .submissions-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .submissions-table th {
+        font-weight: 600;
+        background-color: var(--bg-secondary);
+        white-space: nowrap;
+    }
+
+    .verdict-accepted {
+        color: #198754;
+        font-weight: 600;
+    }
+
+    .verdict-failed {
+        color: #dc3545;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-primary);
+        opacity: 0.7;
+    }
+
+    .language-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    .submissions-header {
+        margin-bottom: 2rem;
+        color: var(--text-primary);
+    }
+
+    .code-link {
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        background-color: #dc3545;
+        /* Bootstrap's danger color */
+        display: inline-block;
+    }
+
+    .code-link:hover {
+        background-color: #bb2d3b;
+        /* Darker shade for hover */
+        color: #fff;
+    }
+
+    .code-link i {
+        font-size: 1.2rem;
+        color: #fff;
+        /* White icon color */
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: var(--bg-primary);
+        margin: 5% auto;
+        padding: 1.5rem;
+        width: 80%;
+        max-width: 800px;
+        border-radius: 8px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .close-modal {
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-primary);
+    }
+
+    .code-container {
+        background-color: var(--bg-secondary);
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+    }
+
+    .code-container pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        color: var(--text-primary);
+        font-family: monospace;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="submission-container">
+    <h2 class="submissions-header">Submission History</h2>
+    {% if submissions %}
+    <table class="submissions-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Problem</th>
+                <th>Result</th>
+                <th>Runtime (ms)</th>
+                <th>Language</th>
+                <th>Submitted At</th>
+                <th>Code</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for submission in submissions %}
+            <tr>
+                <td>{{ submission.user.username }}</td>
+                <td>
+                    <a class="problem-link" href="/problems/{{submission.problem_id}}">{{ submission.problem.title }}
+                    </a>
+                </td>
+                <td>
+                    <span
+                        class="{% if submission.verdict == 'Accepted' %}verdict-accepted{% else %}verdict-failed{% endif %}">
+                        {% if submission.verdict != 'Accepted' %}
+                        <small style="font-size: 0.85em; opacity: 0.9;">
+                            {{ submission.verdict_details }}
+                        </small>
+                        {% else %}
+                        {{ submission.verdict }}
+                        {% endif %}
+                    </span>
+                </td>
+                <td>{{ submission.execution_time|floatformat:3 }}</td>
+                <td>
+                    <span class="language-badge">
+                        {% if submission.language == "py" %}Python
+                        {% elif submission.language == "cpp" %}C++
+                        {% elif submission.language == "java" %}Java
+                        {% else %}{{ submission.language }}
+                        {% endif %}
+                    </span>
+                </td>
+                <td>{{ submission.created_at|date:"M d, Y H:i:s" }}</td>
+                <td>
+                    <span class="code-link" onclick="showCode('{{ submission.id }}', `{{ submission.code|escapejs }}`)">
+                        <i class="fa-solid fa-code"></i>
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <p>No submissions found</p>
+    </div>
+    {% endif %}
+</div>
+
+<div id="codeModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3 id="modalTitle" style="color: var(--text-primary);"></h3>
+        <div class="code-container">
+            <pre id="modalCode"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showCode(submissionId, code) {
+        const modal = document.getElementById('codeModal');
+        const modalCode = document.getElementById('modalCode');
+        const modalTitle = document.getElementById('modalTitle');
+
+        modalTitle.textContent = 'Submission #' + submissionId;
+        modalCode.textContent = code;
+        modal.style.display = 'block';
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('codeModal');
+        modal.style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+        const modal = document.getElementById('codeModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

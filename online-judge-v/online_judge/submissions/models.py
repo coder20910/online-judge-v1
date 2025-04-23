@@ -21,8 +21,9 @@ class CodeSubmission(models.Model):
     output = models.TextField()
     verdict = models.CharField(max_length=50, choices=VERDICT_CHOICES, null=True)
     verdict_details = models.TextField(blank=True, null=True, help_text="Detailed verdict info like failed test case")
+    testcase_results = models.JSONField(blank=True, null=True)  
     execution_time = models.FloatField(null=True, blank=True, help_text="Execution time in seconds")
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.problem.title} - {self.verdict}"
+        return f"{self.user.username} - {self.problem} - {self.verdict}"

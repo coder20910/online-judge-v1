@@ -5,647 +5,875 @@
 {% block additional_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 {% endblock %}
 
 {% block custom_css %}
 <style>
-    :root {
-        --bg-primary: #f4f6f9;
-        --bg-secondary: #ffffff;
-        --text-primary: #212529;
-        --border-color: #ddd;
-    }
+  :root {
+    --bg-primary: #f4f6f9;
+    --bg-secondary: #ffffff;
+    --text-primary: #212529;
+    --border-color: #ddd;
+  }
 
-    [data-theme="dark"] {
-        --bg-primary: #1e1e1e;
-        --bg-secondary: #252526;
-        --text-primary: #e0e0e0;
-        --border-color: #404040;
-    }
+  [data-theme="dark"] {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252526;
+    --text-primary: #e0e0e0;
+    --border-color: #404040;
+  }
 
-    body {
-        background-color: var(--bg-primary);
-        color: var(--text-primary);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        height: 100vh;
-        overflow: hidden;
-    }
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-    .navbar {
-        background-color: var(--bg-secondary);
-        border-bottom: 1px solid var(--border-color);
-        padding: 0.75rem 1rem;
-    }
+  .navbar {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+  }
 
-    .navbar-brand {
-        color: var(--text-primary);
-        font-weight: bold;
-    }
+  .navbar-brand {
+    color: var(--text-primary);
+    font-weight: bold;
+  }
 
-    .theme-toggle {
-        cursor: pointer;
-        color: var(--text-primary);
-        font-size: 1.2rem;
-    }
+  .theme-toggle {
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+  }
 
-    .main-container {
-        display: flex;
-        height: calc(100vh - 56px);
-    }
+  .main-container {
+    display: flex;
+    height: calc(100vh - 56px);
+  }
 
-    .problem-panel {
-        width: 40%;
-        background-color: var(--bg-secondary);
-        overflow-y: auto;
-        border-right: 1px solid var(--border-color);
-    }
+  .problem-panel {
+    width: 40%;
+    background-color: var(--bg-secondary);
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+  }
 
-    .editor-panel {
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        background-color: var(--bg-secondary);
-        overflow-x: auto;
-        overflow-y: auto;
-        white-space: nowrap;
-    }
+  .editor-panel {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-secondary);
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: nowrap;
+  }
 
-    .problem-header {
-        padding: 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
+  .problem-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-    .problem-description {
-        padding: 1rem;
-        font-size: 15px;
-        line-height: 1.6;
-    }
+  .problem-header-left {
+    flex: 1;
+  }
 
-    .editor-header {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+  .submission-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
 
-    .CodeMirror {
-        flex-grow: 1;
-        font-size: 14px;
-        min-width: 600px;
-    }
+  .submission-link:hover {
+    background-color: var(--bg-primary);
+    text-decoration: none;
+  }
 
-    .io-container {
-        display: none;
-        flex-direction: column;
-        border-top: 1px solid var(--border-color);
-    }
+  .submission-link i {
+    margin-right: 0.5rem;
+  }
 
-    .io-buttons {
-        display: flex;
-        justify-content: space-around;
-        padding: 0.5rem;
-        border-bottom: 1px solid var(--border-color);
-        background-color: var(--bg-secondary);
-    }
+  .problem-description {
+    padding: 1rem;
+    font-size: 15px;
+    line-height: 1.6;
+  }
 
-    .io-buttons .btn {
-        flex: 1;
-        margin: 0 0.5rem;
-        font-size: 0.9rem;
-        font-weight: bold;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-        opacity: 0.6;
-        position: relative;
-        border: 1px solid transparent;
-    }
+  .editor-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-    .io-buttons .btn.active {
-        opacity: 1;
-        background-color: #2c3034;
-        color: #ffffff;
-        border-color: #0d6efd;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
+  .CodeMirror {
+    flex-grow: 1;
+    font-size: 14px;
+    min-width: 600px;
+  }
 
-    .io-buttons .btn.active::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background-color: #0d6efd;
-    }
+  .io-container {
+    display: none;
+    flex-direction: column;
+    background-color: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+  }
 
-    .io-content {
-        display: flex;
-        flex-direction: column;
-        height: 100px;
-        width: 100%;
-    }
+  .io-buttons {
+    display: flex;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    gap: 0.5rem;
+  }
 
-    .input-section,
-    .output-section,
-    .verdict-section {
-        flex: 1;
-        display: none;
-        height: 100%;
-        width: 100%;
-        overflow-y: auto;
-    }
+  .io-buttons .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    opacity: 0.7;
+    transition: all 0.2s ease;
+  }
 
-    .input-section.active,
-    .output-section.active,
-    .verdict-section.active {
-        display: block;
-    }
+  .io-buttons .btn.active {
+    opacity: 1;
+    border-color: var(--text-primary);
+  }
 
-    .input-textarea,
-    .output-textarea,
-    .verdict-textarea {
-        width: 100%;
-        resize: none;
-        padding: 0.5rem;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        background-color: var(--bg-secondary);
-        color: var(--text-primary);
-        font-family: monospace;
-    }
+  .io-content {
+    padding: 1rem;
+    background-color: var(--bg-primary);
+  }
 
-    #output {
-        background-color: var(--bg-secondary);
-    }
+  .io-content-card {
+    display: none;
+    width: 100%;
+  }
 
-    .btn-code-run,
-    .btn-code-submit {
-        border: none;
-        padding: 0.5rem 1rem;
-        color: white;
-        border-radius: 4px;
-        font-weight: 500;
-    }
+  .io-content-card.active {
+    display: block;
+  }
 
-    .btn-code-run {
-        background-color: #198754;
-    }
+  .input-textarea,
+  .output-section,
+  .verdict-section {
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: monospace;
+    resize: vertical;
+  }
 
-    .btn-code-run:hover {
-        background-color: #157347;
-    }
+  .output-section,
+  .verdict-section {
+    min-height: 6.3rem;
+    max-height: 20rem;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+  }
 
-    .btn-code-submit {
-        background-color: #0d6efd;
-    }
+  .loader {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+  }
 
-    .btn-code-submit:hover {
-        background-color: #0b5ed7;
-    }
+  .spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--text-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
 
-    .form-select {
-        background-color: var(--bg-secondary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        padding: 0.5rem;
-        padding-left: 20px;
-        padding-right: 50px;
-        width: 150px;
-    }
+  .success-text {
+    color: #198754;
+  }
 
-    .form-select:focus {
-        background-color: var(--bg-secondary);
-        color: var (--text-primary);
-        border-color: var(--text-primary);
-        box-shadow: none;
-    }
+  .error-text {
+    color: #dc3545;
+  }
 
-    [data-theme="dark"] .form-select {
-        background-color: var(--bg-secondary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
+  .hidden {
+    display: none;
+  }
 
-    [data-theme="dark"] .form-select:focus {
-        border-color: var(--text-primary);
-    }
+  .output-wrapper,
+  .verdict-wrapper {
+    height: 100%;
+  }
 
-    .problem-description,
-    .example-section {
-        padding: 1rem;
-        font-size: 15px;
-        line-height: 1.6;
-        color: var(--text-primary);
-    }
+  .output-content,
+  .verdict-content {
+    height: 100%;
+  }
 
-    .example-section h5 {
-        margin-top: 1rem;
-        color: var(--text-primary);
-    }
+  .testcase-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+  }
 
-    .example-section pre {
-        background-color: var(--bg-secondary);
-        color: var (--text-primary);
-        border: 1px solid var(--border-color);
-        padding: 0.5rem;
-        border-radius: 4px;
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
+  }
 
-    .example-section p {
-        color: var(--text-primary);
-    }
+  #output {
+    background-color: var(--bg-secondary);
+  }
 
-    .resizer {
-        width: 5px;
-        background: #ccc;
-        cursor: col-resize;
-        position: relative;
-        z-index: 1;
-    }
+  .btn-code-run,
+  .btn-code-submit {
+    border: none;
+    padding: 0.5rem 1rem;
+    color: white;
+    border-radius: 4px;
+    font-weight: 500;
+  }
 
-    #collapseBtn {
-        padding: 0 8px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
+  .btn-code-run {
+    background-color: #198754;
+  }
 
-    .problem-navigation {
-        background-color: var(--bg-secondary);
-        padding: 0.5rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
+  .btn-code-run:hover {
+    background-color: #157347;
+  }
 
-    .breadcrumb {
-        list-style: none;
-        display: flex;
-        gap: 0.5rem;
-        margin: 0;
-        padding: 0;
-        font-size: 0.9rem;
-    }
+  .btn-code-submit {
+    background-color: #0d6efd;
+  }
 
-    .breadcrumb li {
-        display: inline;
-    }
+  .btn-code-submit:hover {
+    background-color: #0b5ed7;
+  }
 
-    .breadcrumb li a {
-        text-decoration: none;
-        color: var(--text-primary);
-    }
+  .form-select {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    padding-left: 20px;
+    padding-right: 50px;
+    width: 150px;
+  }
 
-    .breadcrumb li a:hover {
-        text-decoration: underline;
-    }
+  .form-select:focus {
+    background-color: var(--bg-secondary);
+    color: var (--text-primary);
+    border-color: var(--text-primary);
+    box-shadow: none;
+  }
 
-    .breadcrumb li.active {
-        font-weight: bold;
-        color: var(--text-primary);
-    }
+  [data-theme="dark"] .form-select {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
 
-    .btn-block {
-        display: block;
-        width: 100%;
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-        font-weight: 500;
-        border-radius: 4px;
-    }
+  [data-theme="dark"] .form-select:focus {
+    border-color: var(--text-primary);
+  }
 
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-        border: none;
-    }
+  .problem-description,
+  .example-section {
+    padding: 1rem;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
 
-    .btn-secondary:hover {
-        background-color: #5a6268;
-    }
+  .example-section h5 {
+    margin-top: 1rem;
+    color: var(--text-primary);
+  }
 
-    .btn-dark {
-        background-color: #343a40;
-        color: white;
-        border: none;
-    }
+  .example-section pre {
+    background-color: var(--bg-secondary);
+    color: var (--text-primary);
+    border: 1px solid var (--border-color);
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
 
-    .btn-dark:hover {
-        background-color: #23272b;
-    }
+  .example-section p {
+    color: var(--text-primary);
+  }
 
-    .btn-danger {
-        background-color: #dc3545;
-        color: white;
-        border: none;
-    }
+  .resizer {
+    width: 5px;
+    background: #ccc;
+    cursor: col-resize;
+    position: relative;
+    z-index: 1;
+  }
 
-    .btn-danger:hover {
-        background-color: #c82333;
-    }
+  #collapseBtn {
+    padding: 0 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
 
-    .row {
-        display: flex;
-        justify-content: space-between;
-        margin: 0 -0.5rem;
-    }
+  .problem-navigation {
+    background-color: var(--bg-secondary);
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
 
-    .col-sm-4 {
-        flex: 0 0 33.3333%;
-        max-width: 33.3333%;
-        padding: 0 0.5rem;
-    }
+  .breadcrumb {
+    list-style: none;
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+  }
 
-    .text-center {
-        text-align: center;
-    }
+  .breadcrumb li {
+    display: inline;
+  }
 
-    .pr-1 {
-        padding-right: 0.25rem;
-    }
+  .breadcrumb li a {
+    text-decoration: none;
+    color: var(--text-primary);
+  }
 
-    .pl-1 {
-        padding-left: 0.25rem;
-    }
+  .breadcrumb li a:hover {
+    text-decoration: underline;
+  }
 
-    .mb-3 {
-        margin-bottom: 1rem;
-    }
+  .breadcrumb li.active {
+    font-weight: bold;
+    color: var(--text-primary);
+  }
 
-    .mt-3 {
-        margin-top: 1rem;
-    }
+  .btn-block {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 4px;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+
+  .btn-dark {
+    background-color: #343a40;
+    color: white;
+    border: none;
+  }
+
+  .btn-dark:hover {
+    background-color: #23272b;
+  }
+
+  .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+  }
+
+  .btn-danger:hover {
+    background-color: #c82333;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 -0.5rem;
+  }
+
+  .col-sm-4 {
+    flex: 0 0 33.3333%;
+    max-width: 33.3333%;
+    padding: 0 0.5rem;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .text-muted {
+    color: #6c757d !important;
+  }
+
+  .pr-1 {
+    padding-right: 0.25rem;
+  }
+
+  .pl-1 {
+    padding-left: 0.25rem;
+  }
+
+  .mb-3 {
+    margin-bottom: 1rem;
+  }
+
+  .mt-3 {
+    margin-top: 1rem;
+  }
+
+  .font-weight-bold {
+    font-weight: 700 !important;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-    <div class="main-container">
-        <div class="problem-panel" id="problem-panel">
-            <div style="text-align: right; padding: 5px 10px;"></div>
-            <div class="problem-header">
-                <h4>{{ problem.title }}</h4>
-                <span class="badge bg-secondary">{{ problem.difficulty }}</span>
-            </div>
-            <div class="problem-description">
-                {{ problem.description }}
-            </div>
-            {% if sample_test_cases %}
-            <div class="example-section">
-                <h5>Example</h5>
-                {% for test in sample_test_cases %}
-                <div class="mb-3">
-                    <strong>Sample Input {{ forloop.counter }}:</strong>
-                    <pre>{{ test.input_data }}</pre>
-
-                    <strong>Sample Output {{ forloop.counter }}:</strong>
-                    <pre>{{ test.output_data }}</pre>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-        <div class="resizer" id="drag-handle"></div>
-        <div class="editor-panel">
-            <div class="editor-header">
-                <select id="language-select" class="form-select w-auto">
-                    <option value="python">Python</option>
-                    <option value="javascript">JavaScript</option>
-                    <option value="java">Java</option>
-                    <option value="cpp">C++</option>
-                </select>
-            </div>
-
-            <textarea id="code-editor"></textarea>
-
-            <div class="io-container" style="display: none;">
-                <div class="io-buttons">
-                    <button id="show-input" class="btn btn-secondary">Input</button>
-                    <button id="show-output" class="btn btn-secondary">Output</button>
-                    <button id="show-verdict" class="btn btn-secondary">Verdict</button>
-                </div>
-                <div class="io-content">
-                    <div class="input-section" id="input-section">
-                        <textarea id="code-input" class="input-textarea" placeholder="Enter input..."></textarea>
-                    </div>
-                    <div class="output-section" id="output-section">
-                        <pre id="output" class="output-textarea"></pre>
-                    </div>
-                    <div class="verdict-section" id="verdict-section">
-                        <pre id="verdict" class="verdict-textarea"></pre>
-                    </div>
-                </div>
-            </div>
-            <div class="row mb-3 mt-3">
-                <div class="col-sm-4 text-center pr-1">
-                    <button id="toggle-console" class="btn btn-block btn-secondary">
-                        Console <i class="fa-solid fa-terminal ml-2"></i>
-                    </button>
-                </div>
-                <div class="col-sm-4 text-center pl-1 pr-1">
-                    <button onclick="runCode()" class="btn btn-block btn-dark">
-                        Run <i class="fa-solid fa-play ml-2"></i>
-                    </button>
-                </div>
-                <div class="col-sm-4 text-center pl-1">
-                    <button onclick="submitCode()" id="submit" class="btn btn-block btn-danger">
-                        Submit <i class="fa-solid fa-circle-check ml-2"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+<div class="main-container">
+  <div class="problem-panel" id="problem-panel">
+    <div style="text-align: right; padding: 5px 10px;"></div>
+    <div class="problem-header">
+      <div class="problem-header-left">
+        <h4>{{ problem.title }}</h4>
+        <span class="badge bg-secondary">{{ problem.difficulty }}</span>
+      </div>
+      <a href="{% url 'submissions:submission_history' problem.id %}" class="submission-link">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        Submissions
+      </a>
     </div>
+    <div class="problem-description">
+      {{ problem.description }}
+    </div>
+    {% if sample_test_cases %}
+    <div class="example-section">
+      <h5>Example</h5>
+      {% for test in sample_test_cases %}
+      <div class="mb-3">
+        <strong>Sample Input {{ forloop.counter }}:</strong>
+        <pre>{{ test.input_data }}</pre>
+
+        <strong>Sample Output {{ forloop.counter }}:</strong>
+        <pre>{{ test.output_data }}</pre>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  <div class="resizer" id="drag-handle"></div>
+  <div class="editor-panel">
+    <div class="editor-header">
+      <select id="language-select" class="form-select w-auto">
+        <option value="python">Python</option>
+        <option value="javascript">JavaScript</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+      </select>
+    </div>
+
+    <textarea id="code-editor"></textarea>
+
+    <div class="io-container" style="display: none;">
+      <div class="io-buttons" role="tablist">
+        <button id="show-input" class="btn btn-secondary active" role="tab" aria-selected="true">Input</button>
+        <button id="show-output" class="btn btn-secondary" role="tab" aria-selected="false">Output</button>
+        <button id="show-verdict" class="btn btn-secondary" role="tab" aria-selected="false">Verdict</button>
+      </div>
+      <div class="io-content">
+        <div class="input-section io-content-card active" id="input-section" role="tabpanel">
+          <textarea id="code-input" class="input-textarea" placeholder="Enter input..."></textarea>
+        </div>
+        <div class="output-section io-content-card" id="output-section" role="tabpanel">
+          <div class="output-wrapper">
+            <div class="loader" style="display: none;">
+              <div class="spinner"></div>
+            </div>
+            <div class="output-content font-weight-bold" style="display: none;">
+              <div class="output-header">
+                <strong>Result: </strong>
+                <span class="success-text hidden">Successful</span>
+                <span class="error-text" id="output-header"></span>
+              </div>
+              <strong>O/P : </strong>
+              <pre id="output-verdict" class="text-muted mt-3"></pre>
+            </div>
+          </div>
+        </div>
+        <div class="verdict-section io-content-card" id="verdict-section" role="tabpanel">
+          <div class="verdict-wrapper">
+            <div class="loader" style="display: none;">
+              <div class="spinner"></div>
+            </div>
+            <div class="verdict-content" style="display: none;">
+              <div class="verdict-header font-weight-bold">
+                <strong>Result: </strong>
+                <span class="success-text hidden">Accepted</span>
+                <span class="error-text" id="verdict-result"></span>
+              </div>
+              <!-- <div id="messageConatinar"> -->
+              <p class="font-weight-bold" id="resMsgHeading"></p>
+              <pre class="text-muted" id="resMsg"></pre>
+              <!-- </div> -->
+              <div class="testcase-section">
+                <strong>Test Cases:</strong>
+                <div id="testcase-results" class="mt-3">
+                  <span class="badge badge-success mr-2">Test Case 1</span><span class="badge badge-success mr-2">Test
+                    Case 2</span><span class="badge badge-success mr-2">Test Case 3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-3 mt-3">
+      <div class="col-sm-4 text-center pr-1">
+        <button id="toggle-console" class="btn btn-block btn-secondary">
+          Console <i class="fa-solid fa-terminal ml-2"></i>
+        </button>
+      </div>
+      <div class="col-sm-4 text-center pl-1 pr-1">
+        <button onclick="runCode()" class="btn btn-block btn-dark">
+          Run <i class="fa-solid fa-play ml-2"></i>
+        </button>
+      </div>
+      <div class="col-sm-4 text-center pl-1">
+        <button onclick="submitCode()" id="submit" class="btn btn-block btn-danger">
+          Submit <i class="fa-solid fa-circle-check ml-2"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block additional_js %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/comment/comment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/comment/continuecomment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/keymap/sublime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/comment/comment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/comment/continuecomment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/keymap/sublime.min.js"></script>
 {% endblock %}
 
 {% block theme_specific_js %}
-    <script>
-        editor.setOption("theme", newTheme === "dark" ? "dracula" : "default");
-    </script>
+<script>
+  editor.setOption("theme", newTheme === "dark" ? "dracula" : "default");
+</script>
 {% endblock %}
 
 {% block custom_js %}
-    <script>
-        var editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
-            mode: "python",
-            theme: "dracula",
-            lineNumbers: true,
-            keyMap: "sublime",
-            extraKeys: {
-                "Ctrl-/": "toggleComment",
-                "Cmd-/": "toggleComment",
-                "Shift-Alt-A": "toggleBlockComment",
-                "Shift-Option-A": "toggleBlockComment"
-            }
-        });
+<script>
+  var editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
+    mode: "python",
+    theme: "dracula",
+    lineNumbers: true,
+    keyMap: "sublime",
+    extraKeys: {
+      "Ctrl-/": "toggleComment",
+      "Cmd-/": "toggleComment",
+      "Shift-Alt-A": "toggleBlockComment",
+      "Shift-Option-A": "toggleBlockComment"
+    }
+  });
 
-        document.getElementById("language-select").addEventListener("change", function () {
-            var language = this.value;
-            var mode = language === "python" ? "python" :
-                language === "javascript" ? "javascript" :
-                    language === "java" ? "text/x-java" :
-                        language === "cpp" ? "text/x-c++src" : "plaintext";
-            editor.setOption("mode", mode);
-        });
+  document.getElementById("language-select").addEventListener("change", function () {
+    var language = this.value;
+    var mode = language === "python" ? "python" :
+      language === "javascript" ? "javascript" :
+        language === "java" ? "text/x-java" :
+          language === "cpp" ? "text/x-c++src" : "plaintext";
+    editor.setOption("mode", mode);
+  });
 
-        const resizer = document.getElementById('drag-handle');
-        const leftPanel = document.getElementById('problem-panel');
-        const rightPanel = document.querySelector('.editor-panel');
-        const container = document.querySelector('.main-container');
+  const resizer = document.getElementById('drag-handle');
+  const leftPanel = document.getElementById('problem-panel');
+  const rightPanel = document.querySelector('.editor-panel');
+  const container = document.querySelector('.main-container');
 
-        let isDragging = false;
+  let isDragging = false;
 
-        window.addEventListener('load', () => {
-            const savedWidth = localStorage.getItem('problemPanelWidth');
-            if (savedWidth) {
-                leftPanel.style.width = savedWidth;
-                rightPanel.style.width = `calc(100% - ${savedWidth} - 5px)`;
-            }
-        });
+  window.addEventListener('load', () => {
+    const savedWidth = localStorage.getItem('problemPanelWidth');
+    if (savedWidth) {
+      leftPanel.style.width = savedWidth;
+      rightPanel.style.width = `calc(100% - ${savedWidth} - 5px)`;
+    }
+  });
 
-        resizer.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            document.body.style.cursor = 'col-resize';
-            document.body.style.userSelect = 'none';
-        });
+  resizer.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
 
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
 
-            const containerLeft = container.offsetLeft;
-            const pointerX = e.clientX - containerLeft;
-            const containerWidth = container.offsetWidth;
+    const containerLeft = container.offsetLeft;
+    const pointerX = e.clientX - containerLeft;
+    const containerWidth = container.offsetWidth;
 
-            const minLeft = 200;
-            const minRight = 300;
+    const minLeft = 200;
+    const minRight = 300;
 
-            if (pointerX > minLeft && containerWidth - pointerX > minRight) {
-                const leftWidthPx = `${pointerX}px`;
-                leftPanel.style.width = leftWidthPx;
-                rightPanel.style.width = `calc(100% - ${leftWidthPx} - 5px)`;
-                localStorage.setItem('problemPanelWidth', leftWidthPx);
-            }
-        });
+    if (pointerX > minLeft && containerWidth - pointerX > minRight) {
+      const leftWidthPx = `${pointerX}px`;
+      leftPanel.style.width = leftWidthPx;
+      rightPanel.style.width = `calc(100% - ${leftWidthPx} - 5px)`;
+      localStorage.setItem('problemPanelWidth', leftWidthPx);
+    }
+  });
 
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            document.body.style.cursor = 'default';
-            document.body.style.userSelect = 'auto';
-        });
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    document.body.style.cursor = 'default';
+    document.body.style.userSelect = 'auto';
+  });
 
-        function resizeLanguageSelect() {
-            const select = document.getElementById("language-select");
-            const tempOption = document.createElement("option");
-            tempOption.textContent = select.options[select.selectedIndex].text;
-            document.body.appendChild(tempOption);
+  function resizeLanguageSelect() {
+    const select = document.getElementById("language-select");
+    const tempOption = document.createElement("option");
+    tempOption.textContent = select.options[select.selectedIndex].text;
+    document.body.appendChild(tempOption);
 
-            select.style.width = `${tempOption.offsetWidth + 20}px`;
+    select.style.width = `${tempOption.offsetWidth + 20}px`;
 
-            document.body.removeChild(tempOption);
+    document.body.removeChild(tempOption);
+  }
+
+  document.getElementById("language-select").addEventListener("change", resizeLanguageSelect);
+  resizeLanguageSelect();
+
+  function showConsole() {
+    const ioContainer = document.querySelector(".io-container");
+    if (ioContainer.style.display === "none" || ioContainer.style.display === "") {
+      ioContainer.style.display = "flex";
+    }
+  }
+
+  function runCode() {
+    const code = editor.getValue();
+    const language = document.getElementById("language-select").value;
+    const input = document.getElementById("code-input").value;
+
+    // Show console if hidden and switch to output section
+    showConsole();
+    toggleSection("output-section");
+
+    const outputWrapper = document.querySelector("#output-section .output-wrapper");
+    const loader = outputWrapper.querySelector(".loader");
+    const content = outputWrapper.querySelector(".output-content");
+    const errorSpan = content.querySelector(".error-text");
+
+    // Show loader, hide content
+    loader.style.display = "flex";
+    content.style.display = "none";
+
+    fetch("/code/run_code/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({ code, language, input })
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Hide loader, show content
+        loader.style.display = "none";
+        content.style.display = "block";
+
+        // Update output content            
+        const verdictSpan = document.getElementById("output-verdict");
+        const successSpan = content.querySelector(".success-text");
+
+        if (data.status === "success") {
+          errorSpan.textContent = "";
+          successSpan.classList.remove("hidden");
+          verdictSpan.classList.remove("hidden");
+          verdictSpan.textContent = data.output;
+
+        } else {
+          successSpan.classList.add("hidden");
+          verdictSpan.classList.remove("hidden");
+          errorSpan.textContent = data?.error_type ? data?.error_type : "Error";
+          verdictSpan.textContent = data.message;
+        }
+      })
+      .catch(error => {
+        // Hide loader, show content with error
+        loader.style.display = "none";
+        content.style.display = "block";
+
+        errorSpan.classList.remove("hidden");
+        verdictSpan.textContent = "An error occurred while running the code.";
+        console.error("Error:", error);
+      });
+  }
+
+  function submitCode() {
+    var code = editor.getValue();
+    var language = document.getElementById("language-select").value;
+    var problemId = "{{ problem.id }}";
+
+    // Show console if hidden and switch to verdict section
+    showConsole();
+    toggleSection("verdict-section");
+
+    const verdictWrapper = document.querySelector("#verdict-section .verdict-wrapper");
+    const loader = verdictWrapper.querySelector(".loader");
+    const content = verdictWrapper.querySelector(".verdict-content");
+    const verdictResult = document.getElementById("verdict-result");
+    const successSpan = content.querySelector(".success-text");
+    const testcaseResults = document.getElementById("testcase-results");
+    const messageHeader = verdictWrapper.querySelector("#resMsgHeading");
+    const messageInfo = verdictWrapper.querySelector("#resMsg");
+
+    // Show loader, hide content
+    loader.style.display = "flex";
+    content.style.display = "none";
+
+    fetch(`/code/submit_code/${problemId}/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({ code, language })
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log("data", data);
+        // Hide loader, show content
+        loader.style.display = "none";
+        content.style.display = "block";
+
+        if (data.verdict === "Accepted") {
+          successSpan.classList.remove("hidden");
+          verdictResult.classList.add("hidden");
+          messageHeader.classList.add("hidden");
+          messageInfo.classList.add("hidden");
+        } else {
+          successSpan.classList.add("hidden");
+          verdictResult.classList.remove("hidden");
+          verdictResult.textContent = data.verdict;
+
+        }
+        if (data.message != "" && data.message != "Time Limit Exceeded") {
+          messageHeader.classList.remove("hidden");
+          messageInfo.classList.remove("hidden");
+          messageHeader.innerHTML = 'Message : ';
+          messageInfo.innerHTML = data.message;
         }
 
-        document.getElementById("language-select").addEventListener("change", resizeLanguageSelect);
-        resizeLanguageSelect();
+        testcaseResults.innerHTML = '';
+        let testCasesCount = data.test_cases_count;
+        if (data.test_case_failed > 0)
+          testCasesCount = data.test_case_failed;
 
-        function runCode() {
-            var code = editor.getValue();
-            var language = document.getElementById("language-select").value;
-            var input = document.getElementById("code-input").value;
+        if (data.test_case_failed == 0 && data.verdict !== 'Accepted')
+          testCasesCount = 1;
 
-            fetch("/code/run_code/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: JSON.stringify({ code, language, input })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    toggleSection("output-section");
-                    document.getElementById("output").textContent = data.output;
-                })
-                .catch(error => console.error("Error:", error));
-        }
+        for (let i = 1; i < testCasesCount; i++)
+          testcaseResults.innerHTML += `<span class="badge badge-success mr-2">Test Case ${i}</span>`;
 
-        function submitCode() {
-            var code = editor.getValue();
-            var language = document.getElementById("language-select").value;
-            var problemId = "{{ problem.id }}";
+        if (data.verdict === 'Accepted')
+          testcaseResults.innerHTML += `<span class="badge badge-success mr-2">Test Case ${testCasesCount}</span>`;
+        else
+          testcaseResults.innerHTML += `<span class="badge badge-danger mr-2">Test Case ${testCasesCount}</span>`;
 
-            fetch(`/code/submit_code/${problemId}/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: JSON.stringify({ code, language })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    toggleSection("verdict-section");
-                    const verdictElement = document.getElementById("verdict");
-                    verdictElement.textContent = data.message;
+      })
+      .catch(error => {
+        // Hide loader, show content with error
+        loader.style.display = "none";
+        content.style.display = "block";
 
-                    if (data.message === "Accepted") {
-                        verdictElement.style.color = "green";
-                    } else {
-                        verdictElement.style.color = "red";
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    toggleSection("verdict-section");
-                    const verdictElement = document.getElementById("verdict");
-                    verdictElement.textContent = "An error occurred while submitting the code.";
-                    verdictElement.style.color = "red";
-                });
-        }
+        successSpan.classList.add("hidden");
+        verdictResult.classList.remove("hidden");
+        verdictResult.textContent = "Error";
+        testcaseResults.innerHTML = `<pre class="verdict-textarea error-text">An error occurred while submitting the code.</pre>`;
+        console.error("Error:", error);
+      });
+  }
 
-        document.getElementById("toggle-console").addEventListener("click", function () {
-            const ioContainer = document.querySelector(".io-container");
-            if (ioContainer.style.display === "none" || ioContainer.style.display === "") {
-                ioContainer.style.display = "flex";
-            } else {
-                ioContainer.style.display = "none";
-            }
-        });
+  let ioContainerSelectedItem = null;
 
-        function toggleSection(showSectionId) {
-            const sections = ["input-section", "output-section", "verdict-section"];
-            sections.forEach((sectionId) => {
-                const section = document.getElementById(sectionId);
-                const button = document.getElementById(`show-${sectionId.split('-')[0]}`);
-                
-                if (sectionId === showSectionId) {
-                    section.classList.add("active");
-                    button.classList.add("active");
-                } else {
-                    section.classList.remove("active");
-                    button.classList.remove("active");
-                }
-            });
-        }
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initialize tab buttons
+    const tabButtons = {
+      'show-input': 'input-section',
+      'show-output': 'output-section',
+      'show-verdict': 'verdict-section'
+    };
 
-        document.getElementById("show-input").addEventListener("click", function () {
-            toggleSection("input-section");
-        });
+    // Add click listeners to tab buttons
+    Object.entries(tabButtons).forEach(([buttonId, sectionId]) => {
+      const button = document.getElementById(buttonId);
+      if (button) {
+        button.addEventListener('click', () => toggleSection(sectionId));
+      }
+    });
 
-        document.getElementById("show-output").addEventListener("click", function () {
-            toggleSection("output-section");
-        });
+    // Initialize first tab as active
+    toggleSection("input-section");
+  });
 
-        document.getElementById("show-verdict").addEventListener("click", function () {
-            toggleSection("verdict-section");
-        });
-    </script>
+  function toggleSection(showSectionId) {
+    const sections = ["input-section", "output-section", "verdict-section"];
+    sections.forEach((sectionId) => {
+      const section = document.getElementById(sectionId);
+      const button = document.getElementById(`show-${sectionId.split('-')[0]}`);
+
+      if (sectionId === showSectionId) {
+        ioContainerSelectedItem = showSectionId;
+        section.classList.add("active");
+        button.classList.add("active");
+      } else {
+        section.classList.remove("active");
+        button.classList.remove("active");
+      }
+    });
+  }
+
+  document.getElementById("toggle-console").addEventListener("click", function () {
+    const ioContainer = document.querySelector(".io-container");
+    if (!ioContainerSelectedItem) {
+      toggleSection("input-section");
+    }
+    if (ioContainer.style.display === "none" || ioContainer.style.display === "") {
+      ioContainer.style.display = "flex";
+    } else {
+      ioContainer.style.display = "none";
+    }
+  });
+</script>
 {% endblock %}
