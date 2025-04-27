@@ -1,93 +1,221 @@
 {% extends 'base/base.html' %}
+{% load static %}
 
 {% block title %}All Problems - Online Judge{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
 
 {% block custom_css %}
 <style>
     .problems-container {
         max-width: 1200px;
         margin: 2rem auto;
-        padding: 0 1rem;
+        padding: 0 1.5rem;
     }
 
-    .problem-card {
-        background-color: var(--bg-secondary);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
+    .problems-header {
+        color: var(--text-primary);
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin: 1.5rem 0 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .problem-card:hover {
+    .problems-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .problems-table th {
+        color: var(--text-primary);
+        font-weight: 600;
+        padding: 1rem;
+        text-align: center;  /* Center align the header text */
+        vertical-align: middle;  /* Vertically center the content */
+        border-bottom: 2px solid var(--border-color);
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .problem-row {
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .problem-row:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        border-color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .problem-info {
-        flex: 1;
+    .problem-row td {
+        padding: 1rem;
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    /* Center align all table cells except the first one (title) */
+    .problem-row td:not(:first-child) {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    /* Keep title cell left-aligned */
+    .problem-row td:first-child {
+        text-align: left;
+        vertical-align: middle;
     }
 
     .problem-link {
         color: var(--text-primary);
         text-decoration: none;
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        display: block;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .problem-link:hover {
+        color: #0d6efd;
+        text-decoration: none;
     }
 
     .problem-difficulty {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         padding: 0.25rem 0.75rem;
         border-radius: 12px;
+        font-weight: 500;
         display: inline-block;
-        margin-left: 1rem;
+        text-align: center;
+        min-width: 90px;
     }
 
     .difficulty-easy {
-        background-color: #198754;
-        color: white;
+        background-color: rgba(25, 135, 84, 0.15);
+        color: #198754;
     }
 
     .difficulty-medium {
-        background-color: #ffc107;
-        color: black;
+        background-color: rgba(255, 193, 7, 0.15);
+        color: #997404;
     }
 
     .difficulty-hard {
-        background-color: #dc3545;
-        color: white;
+        background-color: rgba(220, 53, 69, 0.15);
+        color: #dc3545;
     }
 
-    .problems-header {
+    [data-theme='dark'] .difficulty-easy {
+        background-color: rgba(25, 135, 84, 0.2);
+        color: #2fb344;
+    }
+
+    [data-theme='dark'] .difficulty-medium {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+
+    [data-theme='dark'] .difficulty-hard {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #ff4d4d;
+    }
+
+    .empty-state {
         text-align: center;
+        padding: 4rem 2rem;
         color: var(--text-primary);
-        font-size: 2rem;
-        font-weight: 600;
-        margin: 2rem 0;
-        padding: 0 1rem;
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        border: 2px dashed var(--border-color);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .submissions-count {
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .submissions-count small {
+        color: var(--text-secondary);
+        margin-left: 0.5rem;
+    }
+
+    .acceptance-rate {
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .no-submissions {
+        color: var(--text-secondary);
+        font-size: 0.9em;
+        font-style: italic;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="problems-header">Problems List</div>
 <div class="problems-container">
-    {% for problem in problems %}
-    <div class="problem-card">
-        <div class="problem-info">
-            <a class="problem-link" href="/problems/{{problem.id}}">{{ problem.title }}</a>
-            <!-- <span class="problem-difficulty difficulty-{{ problem.difficulty|lower }}">
-                {{ problem.difficulty }}
-            </span> -->
-        </div>
+    <h1 class="problems-header">
+        Problems List
+        <span>{{ problems|length }} Problems</span>
+    </h1>
+
+    {% if problems %}
+    <table class="problems-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Difficulty</th>
+                <th>Acceptance Rate</th>
+                <th>Submissions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for problem in problems %}
+            <tr class="problem-row">
+                <td>
+                    <a class="problem-link" href="{% url 'problems:problem_detail' problem.id %}">
+                        {{ problem.title }}
+                    </a>
+                </td>
+                <td>
+                    <span class="problem-difficulty difficulty-{{ problem.difficulty|lower }}">
+                        {{ problem.difficulty }}
+                    </span>
+                </td>
+                <td class="acceptance-rate" title="{{ problem.accepted_submissions }}/{{ problem.total_submissions }} submissions">
+                    {% if problem.total_submissions > 0 %}
+                        {{ problem.acceptance_rate|floatformat:1 }}%
+                    {% else %}
+                        <span class="no-submissions">No submissions</span>
+                    {% endif %}
+                </td>
+                <td class="submissions-count">
+                    {{ problem.total_submissions }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-clipboard-list"></i>
+        <p>No problems available at the moment.</p>
     </div>
-    {% endfor %}
+    {% endif %}
 </div>
 {% endblock %}

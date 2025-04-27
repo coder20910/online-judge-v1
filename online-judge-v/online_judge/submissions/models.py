@@ -21,9 +21,26 @@ class CodeSubmission(models.Model):
     output = models.TextField()
     verdict = models.CharField(max_length=50, choices=VERDICT_CHOICES, null=True)
     verdict_details = models.TextField(blank=True, null=True, help_text="Detailed verdict info like failed test case")
-    testcase_results = models.JSONField(blank=True, null=True)  
     execution_time = models.FloatField(null=True, blank=True, help_text="Execution time in seconds")
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.problem} - {self.verdict}"
+
+class UserCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    problem = models.ForeignKey(
+        Problems,
+        on_delete=models.CASCADE,
+        related_name='user_codes'
+    )
+    code = models.TextField(blank=True)
+    language = models.CharField(max_length=20)
+    last_modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['user', 'problem', 'language']
+        ordering = ['-last_modified']
+
+    def __str__(self):
+        return f"{self.user.username}'s {self.language} code for {self.problem.title}"

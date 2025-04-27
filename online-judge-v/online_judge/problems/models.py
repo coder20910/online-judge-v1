@@ -10,9 +10,25 @@ class Problems(models.Model):
     def __str__(self):
         return str(self.title)
 
+    def get_submission_stats(self):
+        submissions = self.codesubmission_set.all()
+        total = submissions.count()
+        accepted = submissions.filter(verdict="Accepted").count()
+
+        stats = {
+            'total_submissions': total,
+            'accepted_submissions': accepted,
+            'acceptance_rate': round((accepted / total * 100), 1) if total > 0 else 0,
+            'unique_users': submissions.values('user').distinct().count()
+        }
+        return stats
+
 class TestCase(models.Model):
     problem = models.ForeignKey(Problems, on_delete=models.CASCADE, related_name="testcases")
     input_data = models.TextField()
     output_data = models.TextField()
     is_public = models.BooleanField(default=False)
     is_sample = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.problem.title)

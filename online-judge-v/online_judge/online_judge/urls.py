@@ -17,12 +17,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from problems.views import all_problems
+from problems.views import all_problems_view
 
 urlpatterns = [
-    path('', all_problems,  name='root'),
+    path('', all_problems_view,  name='root'),
     path("admin/", admin.site.urls),
-    path("problems/", include('problems.urls')),
     path('user/', include('user.urls')),
+    path("problems/", include(('problems.urls', 'problems'), namespace='problems')),
     path('code/', include(('submissions.urls', 'submissions'), namespace='submissions')),
 ]

@@ -9,17 +9,31 @@
     
     <style>
         :root {
-            --bg-primary: #ffffff;
+            /* Light theme variables */
+            --bg-primary: #f4f6f9;
             --bg-secondary: #ffffff;
             --text-primary: #212529;
+            --text-secondary: #6c757d;
             --border-color: #ddd;
+            --accent-color: #0d6efd;
+            --success-color: #198754;
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            --code-bg: #f8f9fa;
         }
 
-        [data-theme="dark"] {
-            --bg-primary: #1e1e1e;
-            --bg-secondary: #252526;
-            --text-primary: #e0e0e0;
-            --border-color: #404040;
+        [data-theme='dark'] {
+            /* Dark theme variables */
+            --bg-primary: #020817;
+            --bg-secondary: #0f172a;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border-color: #1e293b;
+            --accent-color: #3b82f6;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --warning-color: #eab308;
+            --code-bg: #1e293b;
         }
 
         body {
@@ -44,6 +58,13 @@
             color: var(--text-primary);
             font-weight: bold;
             transition: color 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .navbar-brand:hover {
+            color: var(--accent-color);
+            text-decoration: none;
         }
 
         .theme-toggle {
@@ -52,13 +73,106 @@
             font-size: 1.2rem;
             transition: color 0.3s ease;
         }
+
+        .user-info-button {
+            cursor: pointer;
+            color: var(--text-primary);
+            margin-left: 1rem;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .user-popup {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 1rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            min-width: 200px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .user-popup.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .user-info {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .user-id {
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            opacity: 0.8;
+        }
+
+        .logout-button {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #bb2d3b;
+        }
+
+        .user-info-button:hover {
+            color: var(--accent-color);
+        }
+
+        .user-popup::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 24px;
+            width: 16px;
+            height: 16px;
+            background-color: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            transform: rotate(45deg);
+        }
     </style>
     {% block custom_css %}{% endblock %}
 </head>
 <body>
     <nav class="navbar">
-        <span class="navbar-brand">Online Judge</span>
-        <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
+        <a href="{% url 'problems:all_problems' %}" class="navbar-brand" style="text-decoration: none;">Online Judge</a>
+        <div style="display: flex; align-items: center;">
+            <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
+            <div class="user-info-button" onclick="toggleUserPopup()">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-popup" id="userPopup">
+                <div class="user-info">
+                    <div class="user-name">Hi, {{ request.user.username }}</div>
+                </div>
+                <a href="{% url 'user:logout' %}" class="logout-button">Logout</a>
+            </div>
+        </div>
     </nav>
 
     {% block content %}{% endblock %}
@@ -67,22 +181,46 @@
     
     <script>
         function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute("data-theme");
-            const newTheme = currentTheme === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", newTheme);
-            localStorage.setItem("theme", newTheme);
-            updateThemeIcon(newTheme);
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Dispatch theme change event
+            const event = new CustomEvent('themeChanged', { detail: newTheme });
+            document.dispatchEvent(event);
         }
 
-        function updateThemeIcon(theme) {
-            const icon = document.querySelector('.theme-toggle');
-            icon.textContent = theme === 'dark' ? '🌙' : '☀️';
-        }
-
+        // Set initial theme
         document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem("theme") || "dark";
-            document.documentElement.setAttribute("data-theme", savedTheme);
-            updateThemeIcon(savedTheme);
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+
+        function toggleUserPopup() {
+            const popup = document.getElementById('userPopup');
+            popup.classList.toggle('show');
+
+            // Close popup when clicking outside
+            document.addEventListener('click', function closePopup(e) {
+                const popup = document.getElementById('userPopup');
+                const userButton = document.querySelector('.user-info-button');
+                
+                if (!popup.contains(e.target) && !userButton.contains(e.target)) {
+                    popup.classList.remove('show');
+                    document.removeEventListener('click', closePopup);
+                }
+            });
+        }
+
+        // Close popup when pressing Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const popup = document.getElementById('userPopup');
+                popup.classList.remove('show');
+            }
         });
     </script>
     {% block custom_js %}{% endblock %}

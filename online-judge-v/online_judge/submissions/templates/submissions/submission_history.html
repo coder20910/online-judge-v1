@@ -6,6 +6,8 @@
 {% block additional_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
 {% endblock %}
 
 {% block custom_css %}
@@ -30,10 +32,27 @@
         color: var(--text-primary);
     }
 
-    .submissions-table th {
+    .submissions-table thead tr {
+        background-color: #212529;  /* Dark background for header */
+    }
+
+    .submissions-table thead th {
+        color: #fff;  /* White text for header */
         font-weight: 600;
-        background-color: var(--bg-secondary);
+        background-color: transparent;  /* Override previous background */
         white-space: nowrap;
+    }
+
+    .submissions-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .submissions-table tbody tr.accepted {
+        background-color: rgba(25, 135, 84, 0.1);  /* Light green for accepted */
+    }
+
+    .submissions-table tbody tr.failed {
+        background-color: rgba(220, 53, 69, 0.1);  /* Light red for failed */
     }
 
     .verdict-accepted {
@@ -113,12 +132,7 @@
     }
 
     .close-modal {
-        position: absolute;
-        right: 1rem;
-        top: 1rem;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: var(--text-primary);
+        display: none;
     }
 
     .code-container {
@@ -135,18 +149,130 @@
         color: var(--text-primary);
         font-family: monospace;
     }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .modal-btn {
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: 0.5rem;
+        font-size: 1.2rem;
+        transition: color 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 4px;
+    }
+
+    .modal-btn:hover {
+        background-color: var(--bg-secondary);
+    }
+
+    .copy-btn {
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: 0.5rem;
+        font-size: 1.2rem;
+        transition: color 0.2s ease;
+    }
+
+    .copy-btn:hover {
+        color: #0d6efd;
+    }
+
+    .close-btn:hover {
+        color: #dc3545;
+    }
+
+    .CodeMirror {
+        height: auto;
+        max-height: 60vh;
+        border-radius: 4px;
+    }
+
+    .submission-navbar {
+        background-color: var(--bg-secondary);
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .navbar-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .navbar-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .navbar-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .back-btn:hover {
+        background-color: var(--bg-primary);
+        text-decoration: none;
+        color: var(--text-primary);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Add this navbar section before the submission-container -->
+<nav class="submission-navbar">
+    <div class="navbar-content">
+        <h1 class="navbar-title">{{ problem.title }} - Submissions</h1>
+        <div class="navbar-actions">
+            <a href="/problems/{{problem.id}}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back to Problem
+            </a>
+        </div>
+    </div>
+</nav>
+
 <div class="submission-container">
-    <h2 class="submissions-header">Submission History</h2>
     {% if submissions %}
     <table class="submissions-table">
         <thead>
             <tr>
-                <th>User</th>
-                <th>Problem</th>
                 <th>Result</th>
                 <th>Runtime (ms)</th>
                 <th>Language</th>
@@ -156,25 +282,14 @@
         </thead>
         <tbody>
             {% for submission in submissions %}
-            <tr>
-                <td>{{ submission.user.username }}</td>
-                <td>
-                    <a class="problem-link" href="/problems/{{submission.problem_id}}">{{ submission.problem.title }}
-                    </a>
-                </td>
+            <tr class="{% if submission.verdict == 'Accepted' %}accepted{% else %}failed{% endif %}">
                 <td>
                     <span
                         class="{% if submission.verdict == 'Accepted' %}verdict-accepted{% else %}verdict-failed{% endif %}">
-                        {% if submission.verdict != 'Accepted' %}
-                        <small style="font-size: 0.85em; opacity: 0.9;">
-                            {{ submission.verdict_details }}
-                        </small>
-                        {% else %}
-                        {{ submission.verdict }}
-                        {% endif %}
+                        {{ submission.verdict_details }}
                     </span>
                 </td>
-                <td>{{ submission.execution_time|floatformat:3 }}</td>
+                <td>{{ submission.execution_time }}</td>
                 <td>
                     <span class="language-badge">
                         {% if submission.language == "py" %}Python
@@ -184,9 +299,10 @@
                         {% endif %}
                     </span>
                 </td>
-                <td>{{ submission.created_at|date:"M d, Y H:i:s" }}</td>
+                <td>{{ submission.timestamp|date:"M d, Y H" }}</td>
                 <td>
-                    <span class="code-link" onclick="showCode('{{ submission.id }}', `{{ submission.code|escapejs }}`)">
+                    <span class="code-link"
+                        onclick="showCode('{{ submission.id }}', `{{ submission.code|escapejs }}`, '{{ submission.verdict }}', '{{ submission.verdict_details }}')">
                         <i class="fa-solid fa-code"></i>
                     </span>
                 </td>
@@ -203,23 +319,61 @@
 
 <div id="codeModal" class="modal">
     <div class="modal-content">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h3 id="modalTitle" style="color: var(--text-primary);"></h3>
+        <div class="modal-header">
+            <h3 id="modalTitle" style="color: var(--text-primary);"></h3>
+            <div class="modal-actions">
+                <button class="modal-btn copy-btn" onclick="copyCode()" title="Copy Code">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="modal-btn close-btn" onclick="closeModal()" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
         <div class="code-container">
-            <pre id="modalCode"></pre>
+            <textarea id="codeEditor"></textarea>
         </div>
     </div>
 </div>
 
 <script>
-    function showCode(submissionId, code) {
+    let editor;
+
+    function showCode(submissionId, code, verdict, verdictDetails) {
         const modal = document.getElementById('codeModal');
-        const modalCode = document.getElementById('modalCode');
         const modalTitle = document.getElementById('modalTitle');
 
-        modalTitle.textContent = 'Submission #' + submissionId;
-        modalCode.textContent = code;
+        modalTitle.textContent = verdict === 'Accepted' ?
+            `${verdict}` :
+            `${verdictDetails}`;
         modal.style.display = 'block';
+
+        if (!editor) {
+            editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+                lineNumbers: true,
+                theme: 'monokai',
+                mode: 'python',
+                readOnly: true,
+                viewportMargin: Infinity
+            });
+        }
+
+        editor.setValue(code);
+        editor.refresh();
+    }
+
+    function copyCode() {
+        const code = editor.getValue();
+        navigator.clipboard.writeText(code).then(() => {
+            const copyBtn = document.querySelector('.copy-btn');
+            const icon = copyBtn.querySelector('i');
+
+            // Show feedback
+            icon.className = 'fas fa-check';
+            setTimeout(() => {
+                icon.className = 'fas fa-copy';
+            }, 2000);
+        });
     }
 
     function closeModal() {
@@ -231,8 +385,14 @@
     window.onclick = function (event) {
         const modal = document.getElementById('codeModal');
         if (event.target == modal) {
-            modal.style.display = 'none';
+            closeModal();
         }
     }
 </script>
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
 {% endblock %}
